@@ -1,0 +1,31 @@
+HOW TO UPLOAD PIXEL CAR RACING TO GAMEHELP.SITE (IONOS)
+
+1. LOG INTO IONOS:
+   - Go to https://my.ionos.com
+   - Login with your credentials
+
+2. ACCESS YOUR HOSTING:
+   - Click "Hosting" or "Webspace"
+   - Click "File Manager" or "Dateimanager"
+
+3. UPLOAD FILES:
+   - Navigate to the root directory (usually / or /htdocs)
+   - Upload these files from /home/leo/pixelcarracing/:
+     * pixel-car-racing.html
+     * download.html (optional download page)
+   
+4. ACCESS YOUR GAME:
+   - https://gamehelp.site/pixel-car-racing.html
+   - OR replace index.html to make it the main page
+
+ALTERNATIVE - FTP UPLOAD:
+   Host: ftp.gamehelp.site
+   User: [your FTP username from IONOS]
+   Pass: [your FTP password]
+   
+   Then I can upload with:
+   curl -T pixel-car-racing.html ftp://ftp.gamehelp.site --user user:pass
+
+FILES LOCATION:
+   /home/leo/pixelcarracing/pixel-car-racing.html
+   /home/leo/pixelcarracing/download.html
