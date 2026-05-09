@@ -7,6 +7,13 @@ let highScore = localStorage.getItem('pixelCarHighScore') || 0;
 let gameSpeed = 3;
 let speedIncrement = 0.001;
 
+const difficultySettings = {
+    easy: { initialSpeed: 1.5, speedIncrement: 0.0005, enemySpawnRate: 150, playerSpeed: 7 },
+    medium: { initialSpeed: 2, speedIncrement: 0.0008, enemySpawnRate: 120, playerSpeed: 6 },
+    hard: { initialSpeed: 3, speedIncrement: 0.001, enemySpawnRate: 100, playerSpeed: 5 }
+};
+let selectedDifficulty = 'hard';
+
 const CANVAS_WIDTH = 400;
 const CANVAS_HEIGHT = 600;
 canvas.width = CANVAS_WIDTH;
@@ -87,12 +94,31 @@ function showStartScreen() {
     gameState = 'start';
 }
 
+function renderDifficultyOptions() {
+    const container = document.getElementById('difficultyOptions');
+    container.innerHTML = '';
+    const difficulties = ['easy', 'medium', 'hard'];
+    difficulties.forEach(diff => {
+        const option = document.createElement('div');
+        option.className = 'difficulty-option ' + (diff === selectedDifficulty ? 'selected' : '');
+        option.onclick = () => selectDifficulty(diff);
+        option.textContent = diff.charAt(0).toUpperCase() + diff.slice(1);
+        container.appendChild(option);
+    });
+}
+
+function selectDifficulty(diff) {
+    selectedDifficulty = diff;
+    renderDifficultyOptions();
+}
+
 function showSelectScreen() {
     document.getElementById('startScreen').style.display = 'none';
     document.getElementById('selectScreen').style.display = 'flex';
     document.getElementById('gameOverScreen').style.display = 'none';
     gameState = 'select';
     renderCarOptions();
+    renderDifficultyOptions();
 }
 
 function showHighScores() {
@@ -124,9 +150,14 @@ function startGame() {
     document.getElementById('selectScreen').style.display = 'none';
     document.getElementById('gameOverScreen').style.display = 'none';
     gameState = 'playing';
-    
+
+    const settings = difficultySettings[selectedDifficulty];
+    gameSpeed = settings.initialSpeed;
+    speedIncrement = settings.speedIncrement;
+    enemySpawnRate = settings.enemySpawnRate;
+    playerCar.speed = settings.playerSpeed;
+
     score = 0;
-    gameSpeed = 3;
     enemyCars = [];
     enemySpawnCounter = 0;
     playerCar.x = CANVAS_WIDTH / 2 - 15;
