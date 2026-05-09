@@ -7,6 +7,13 @@ let highScore = localStorage.getItem('pixelCarHighScore') || 0;
 let gameSpeed = 3;
 let speedIncrement = 0.001;
 
+const difficultySettings = {
+    easy: { initialSpeed: 1.5, speedIncrement: 0.0005, enemySpawnRate: 150, playerSpeed: 7 },
+    medium: { initialSpeed: 2, speedIncrement: 0.0008, enemySpawnRate: 120, playerSpeed: 6 },
+    hard: { initialSpeed: 3, speedIncrement: 0.001, enemySpawnRate: 100, playerSpeed: 5 }
+};
+let selectedDifficulty = 'hard';
+
 const CANVAS_WIDTH = 400;
 const CANVAS_HEIGHT = 600;
 canvas.width = CANVAS_WIDTH;
@@ -80,11 +87,48 @@ canvas.addEventListener('mouseup', () => {
     playerCar.isMovingRight = false;
 });
 
+document.addEventListener('keydown', (e) => {
+    if (gameState !== 'playing') return;
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        playerCar.isMovingLeft = true;
+    }
+    if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        playerCar.isMovingRight = true;
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        playerCar.isMovingLeft = false;
+    }
+    if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        playerCar.isMovingRight = false;
+    }
+});
+
 function showStartScreen() {
     document.getElementById('startScreen').style.display = 'flex';
     document.getElementById('selectScreen').style.display = 'none';
     document.getElementById('gameOverScreen').style.display = 'none';
     gameState = 'start';
+}
+
+function renderDifficultyOptions() {
+    const container = document.getElementById('difficultyOptions');
+    container.innerHTML = '';
+    const difficulties = ['easy', 'medium', 'hard'];
+    difficulties.forEach(diff => {
+        const option = document.createElement('div');
+        option.className = 'difficulty-option ' + (diff === selectedDifficulty ? 'selected' : '');
+        option.onclick = () => selectDifficulty(diff);
+        option.textContent = diff.charAt(0).toUpperCase() + diff.slice(1);
+        container.appendChild(option);
+    });
+}
+
+function selectDifficulty(diff) {
+    selectedDifficulty = diff;
+    renderDifficultyOptions();
 }
 
 function showSelectScreen() {
@@ -93,10 +137,11 @@ function showSelectScreen() {
     document.getElementById('gameOverScreen').style.display = 'none';
     gameState = 'select';
     renderCarOptions();
+    renderDifficultyOptions();
 }
 
 function showHighScores() {
-    alert(`High Score: ${highScore}`);
+    alert('High Score: ' + highScore);
 }
 
 function renderCarOptions() {
@@ -104,7 +149,7 @@ function renderCarOptions() {
     container.innerHTML = '';
     carOptions.forEach((car, index) => {
         const option = document.createElement('div');
-        option.className = `car-option ${index === selectedCarIndex ? 'selected' : ''}`;
+        option.className = 'car-option ' + (index === selectedCarIndex ? 'selected' : '');
         option.onclick = () => {
             selectedCarIndex = index;
             playerCar.color = carOptions[index].color;
@@ -124,9 +169,14 @@ function startGame() {
     document.getElementById('selectScreen').style.display = 'none';
     document.getElementById('gameOverScreen').style.display = 'none';
     gameState = 'playing';
-    
+
+    const settings = difficultySettings[selectedDifficulty];
+    gameSpeed = settings.initialSpeed;
+    speedIncrement = settings.speedIncrement;
+    enemySpawnRate = settings.enemySpawnRate;
+    playerCar.speed = settings.playerSpeed;
+
     score = 0;
-    gameSpeed = 3;
     enemyCars = [];
     enemySpawnCounter = 0;
     playerCar.x = CANVAS_WIDTH / 2 - 15;
@@ -142,8 +192,8 @@ function gameOver() {
         highScore = score;
         localStorage.setItem('pixelCarHighScore', highScore);
     }
-    document.getElementById('finalScore').textContent = `Score: ${score}`;
-    document.getElementById('highScore').textContent = `High Score: ${highScore}`;
+    document.getElementById('finalScore').textContent = 'Score: ' + score;
+    document.getElementById('highScore').textContent = 'High Score: ' + highScore;
     document.getElementById('gameOverScreen').style.display = 'flex';
 }
 
@@ -236,8 +286,8 @@ function draw() {
     
     ctx.fillStyle = '#fff';
     ctx.font = '20px monospace';
-    ctx.fillText(`Score: ${score}`, 10, 30);
-    ctx.fillText(`Speed: ${gameSpeed.toFixed(1)}`, 10, 60);
+    ctx.fillText('Score: ' + score, 10, 30);
+    ctx.fillText('Speed: ' + gameSpeed.toFixed(1), 10, 60);
 }
 
 function drawCar(car) {
